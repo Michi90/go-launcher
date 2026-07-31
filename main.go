@@ -51,7 +51,8 @@ type config struct {
 	SSHPublicKey    string
 	SSHPort         int
 	SSHPasswordAuth bool
-	NodeMajor       int
+    NodeMajor       int
+    Timezone        string
 	Packages        string
 }
 
@@ -156,6 +157,7 @@ func initialModel() model {
 			SSHPort:         22,
 			SSHPasswordAuth: true,
 			NodeMajor:       22,
+            Timezone:        "Europe/Berlin",
 			Packages:        "git curl wget nano vim htop tree unzip zip jq ca-certificates gnupg lsb-release software-properties-common build-essential",
 		},
 		logCh: make(chan tea.Msg, 256),
@@ -795,9 +797,12 @@ func installNode(cfg config, w *channelWriter) error {
 	script := fmt.Sprintf(`set -e
 curl -fsSL https://deb.nodesource.com/setup_%d.x | bash -
 apt-get install -y nodejs
+timedatectl set-timezone "%s"
 node --version
 npm --version
-`, cfg.NodeMajor)
+timedatectl
+`, cfg.NodeMajor, cfg.Timezone)
+
 	return runShellLogged(w, script)
 }
 
